@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@types/amqplib": "^0.10.1",
+    "amqplib": "^0.10.3",
+    "node": "^20.0.0"
+  },
+  "devDependencies": {
+    "@types/amqp": "^0.2.5"
+  }
+}
