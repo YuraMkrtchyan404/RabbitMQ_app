@@ -1,25 +1,46 @@
 import * as amqp from 'amqplib';
-// const connection = await connect('ampq://localhost');
-// const channel = await connection.createChannel();
-// const queue = 'messages';
-// const message = 'My first rabbitmq message';
-// await channel.assertQueue(queue, { durable: false });
 
-// channel.sendToQueue(queue, Buffer.from(message));
+// class Connector{
+//     channel: amqp.Channel;
+//
+//     establishConnection = async (url: string) => {
+//         const connection: amqp.Connection = await amqp.connect('amqp://username:password@localhost:5672');
+//         const channel: amqp.Channel = await connection.createChannel();
+//         return channel;
+//     }
+//
+//     constructor(url: string) {
+//         this.establishConnection(url).then(this.channel = )
+//     }
+// }
 
-const sendMessage = async () => {
-    const connection: amqp.Connection = await amqp.connect(
-        'amqp://localhost'
-    );
 
+const URL = 'amqp://username:password@localhost:5672';
+const QUEUE_NAME = 'messageQueue';
+
+const createChannel = async (url: string, queueName: string) => {
+    const connection: amqp.Connection = await amqp.connect(url);
     const channel: amqp.Channel = await connection.createChannel();
-
-    await channel.assertQueue('messageQueue', { durable: false });
-
-    const message = 'My first rabbitmq message';
-    channel.sendToQueue('messageQueue', Buffer.from(message));
-    console.log(message);
-
+    await channel.assertQueue(queueName, {durable: false});
+    return channel;
 }
 
-sendMessage();
+const addToQueue = (count: number, channel: amqp.Channel) => {
+    return () => {
+        const message = 'message number: ' + count;
+        channel.sendToQueue(QUEUE_NAME, Buffer.from(message));
+        console.log(message);
+        count += 1;
+    };
+}
+
+const sendMessagePromise = new Promise(async (resolve) => {
+    const channel = await createChannel(URL, QUEUE_NAME);
+    let count = 1;
+    setInterval(addToQueue(count, channel), 1000);
+    resolve('The Promise is fulfilled');
+})
+
+sendMessagePromise.then((value) => {
+    console.log(value);
+});

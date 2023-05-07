@@ -1,36 +1,27 @@
 import * as amqp from 'amqplib';
-// import client, { Connection, Channel, ConsumeMessage } from 'amqplib';
-// const connection = await Connection('ampq://localhost');
-// const channel = await connection.createChannel();
-// const queue = 'messages';
-// const message = 'My first rabbitmq message';
-// await channel.assertQueue(queue, { durable: false });
 
-// channel.consume(queue, (msg: ConsumeMessage) => {
-//     console.log(` [x] Received ${msg.content.toString()}`);
-// });
+const URL = 'amqp://username:password@localhost:5672';
+const QUEUE_NAME = 'messageQueue';
 
-const getMessage = async () => {
+const createChannel = async (url: string, queueName: string) => {
+    const connection: amqp.Connection = await amqp.connect(url);
+    const channel: amqp.Channel = await connection.createChannel();
+    await channel.assertQueue(queueName, {durable: false});
+    return channel;
+}
 
-    const connection: amqp.Connection = await amqp.connect(
-        'amqp://localhost'
-    );
-
-    const consumer = (channel: amqp.Channel) => (msg: amqp.ConsumeMessage | null): void => {
+const getMessagePromise = new Promise(async (resolve) => {
+    const channel = await createChannel(URL, QUEUE_NAME);
+    const consumer = (msg: amqp.ConsumeMessage | null) => {
         if (msg) {
             console.log('Received: ', msg.content.toString());
             channel.ack(msg);
         }
-    }
+    };
+    await channel.consume('messageQueue', consumer, {noAck: false});
+    resolve('The promise is fulfilled');
+});
 
-
-
-    const channel: amqp.Channel = await connection.createChannel();
-
-    await channel.assertQueue('messageQueue');
-
-    await channel.consume('messageQueue', consumer(channel));
-
-}
-
-getMessage();
+getMessagePromise.then((value) => {
+    console.log(value);
+});
