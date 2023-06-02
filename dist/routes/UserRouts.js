@@ -10,10 +10,10 @@ class UserRoutes {
         this.setupRoutes();
     }
     setupRoutes() {
-        this.router.get('/users', this.userController.getUserMessage);
+        this.router.get('/users/:id', this.userController.getUserMessage);
         this.router.post('/users', this.userController.addUserMessage);
-        this.router.put('/users', this.userController.updateUserMessage);
-        this.router.delete('/users', this.userController.deleteUserMessage);
+        this.router.put('/users/:id', this.userController.updateUserMessage);
+        this.router.delete('/users/:id', this.userController.deleteUserMessage);
     }
     getRouter() {
         return this.router;

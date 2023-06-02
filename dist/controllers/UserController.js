@@ -16,7 +16,7 @@ class UserController {
     }
     async getUserMessage(req, res) {
         try {
-            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.GET_USER, data: { id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.GET_USER, data: { id: req.params.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
             res.sendStatus(200);
         }
         catch (error) {
@@ -36,7 +36,7 @@ class UserController {
     }
     async updateUserMessage(req, res) {
         try {
-            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.UPDATE_USER, data: { ...req.body, id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.UPDATE_USER, data: { ...req.body, id: req.params.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
             res.sendStatus(200);
         }
         catch (error) {
@@ -46,7 +46,7 @@ class UserController {
     }
     async deleteUserMessage(req, res) {
         try {
-            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.DELETE_USER, data: { id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.DELETE_USER, data: { id: req.params.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
             res.sendStatus(200);
         }
         catch (error) {

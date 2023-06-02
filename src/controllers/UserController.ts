@@ -18,7 +18,7 @@ export class UserController {
 
     public async getUserMessage(req: Request, res: Response) {
         try {
-            RabbitMQConnection.sendMessage({ type: MessagingCodes.GET_USER, data: { id: req.query.id } }, RabbitMQConnection.queueName!);
+            RabbitMQConnection.sendMessage({ type: MessagingCodes.GET_USER, data: { id: req.params.id } }, RabbitMQConnection.queueName!);
             res.sendStatus(200);
         } catch (error) {
             log(error);
@@ -38,7 +38,7 @@ export class UserController {
 
     public async updateUserMessage(req: Request, res: Response) {
         try {
-            RabbitMQConnection.sendMessage({ type: MessagingCodes.UPDATE_USER, data: { ...req.body, id: req.query.id } }, RabbitMQConnection.queueName!);
+            RabbitMQConnection.sendMessage({ type: MessagingCodes.UPDATE_USER, data: { ...req.body, id: req.params.id } }, RabbitMQConnection.queueName!);
             res.sendStatus(200);
         } catch (error) {
             log(error);
@@ -48,7 +48,7 @@ export class UserController {
 
     public async deleteUserMessage(req: Request, res: Response) {
         try {
-            RabbitMQConnection.sendMessage({ type: MessagingCodes.DELETE_USER, data: { id: req.query.id } }, RabbitMQConnection.queueName!);
+            RabbitMQConnection.sendMessage({ type: MessagingCodes.DELETE_USER, data: { id: req.params.id } }, RabbitMQConnection.queueName!);
             res.sendStatus(200);
         } catch (error) {
             log(error);
