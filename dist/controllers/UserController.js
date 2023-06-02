@@ -2,30 +2,55 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const RabbitMQConnection_1 = require("../utils/RabbitMQConnection");
-const User_1 = require("../models/User");
 const console_1 = require("console");
+const messagingcodes_enum_1 = require("../utils/messagingcodes.enum");
 class UserController {
     constructor(queueName) {
         RabbitMQConnection_1.RabbitMQConnection.queueName = queueName;
     }
     async initRabbitMQConnection(url) {
-        (0, console_1.log)("CONTOLLER properties while initializing the rabbitMQSender: \n", "QUEUE NAME \n", RabbitMQConnection_1.RabbitMQConnection.queueName, '\n');
         await RabbitMQConnection_1.RabbitMQConnection.init(url, RabbitMQConnection_1.RabbitMQConnection.queueName).catch(error => {
             (0, console_1.log)("Failed to initialize the connection: ", error);
             process.exit(1);
         });
-        (0, console_1.log)("RABBITMQ CONNECTION is initialized, QUEUE NAME IS ", RabbitMQConnection_1.RabbitMQConnection.queueName);
     }
-    async sendMessage(req, res) {
+    async getUserMessage(req, res) {
         try {
-            const { name, surname, password, birthday } = await req.body;
-            const user = new User_1.User(name, surname, password, birthday);
-            const userInformaition = name + " " + surname + " " + password + " " + birthday;
-            RabbitMQConnection_1.RabbitMQConnection.sendMessage(userInformaition, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.GET_USER, data: { id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
             res.sendStatus(200);
         }
         catch (error) {
-            (0, console_1.log)("HERE: problem with sending message in the controller \n", error);
+            (0, console_1.log)(error);
+            res.sendStatus(500);
+        }
+    }
+    async addUserMessage(req, res) {
+        try {
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.ADD_USER, data: { ...req.body } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            res.sendStatus(200);
+        }
+        catch (error) {
+            (0, console_1.log)(error);
+            res.sendStatus(500);
+        }
+    }
+    async updateUserMessage(req, res) {
+        try {
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.UPDATE_USER, data: { ...req.body, id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            res.sendStatus(200);
+        }
+        catch (error) {
+            (0, console_1.log)(error);
+            res.sendStatus(500);
+        }
+    }
+    async deleteUserMessage(req, res) {
+        try {
+            RabbitMQConnection_1.RabbitMQConnection.sendMessage({ type: messagingcodes_enum_1.MessagingCodes.DELETE_USER, data: { id: req.query.id } }, RabbitMQConnection_1.RabbitMQConnection.queueName);
+            res.sendStatus(200);
+        }
+        catch (error) {
+            (0, console_1.log)(error);
             res.sendStatus(500);
         }
     }

@@ -18,7 +18,7 @@ const main = async () => {
     // initialize the rout
     const userRoutes = new UserRoutes(QUEUE_NAME);
     await userRoutes.getUserController().initRabbitMQConnection(URL);
-    log("Finished setting up the router");
+    // log("Finished setting up the router");
     app.use(userRoutes.getRouter());
 
     // initialize the rabbitMQ consumer

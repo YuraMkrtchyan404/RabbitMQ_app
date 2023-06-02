@@ -3,17 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRoutes = void 0;
 const express_1 = require("express");
 const UserController_1 = require("../controllers/UserController");
-const console_1 = require("console");
 class UserRoutes {
     constructor(queueName) {
         this.router = (0, express_1.Router)();
         this.userController = new UserController_1.UserController(queueName);
         this.setupRoutes();
-        (0, console_1.log)("ROUTER after being inited: \n", this);
     }
     setupRoutes() {
-        console.log("Setting up the router \n");
-        this.router.post('/users', this.userController.sendMessage);
+        this.router.get('/users', this.userController.getUserMessage);
+        this.router.post('/users', this.userController.addUserMessage);
+        this.router.put('/users', this.userController.updateUserMessage);
+        this.router.delete('/users', this.userController.deleteUserMessage);
     }
     getRouter() {
         return this.router;
