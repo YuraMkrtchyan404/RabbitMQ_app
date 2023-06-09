@@ -1,6 +1,8 @@
 import { RabbitMQConnection } from "./utils/RabbitMQConnection"
 import { error } from "console"
 import { UserService } from "./services/UserService"
+import { PrismaClient } from "@prisma/client"
+import { MessageHandler } from "./utils/MessageHandler"
 
 const URL = "amqp://username:password@localhost:5672"
 const QUEUE_NAME = "messageQueue"
@@ -10,12 +12,12 @@ const main = async () => {
 
     await RabbitMQConnection.init(URL, RETRY_QUEUE_NAME)
     await RabbitMQConnection.consumeMessage(QUEUE_NAME, (msg) => {
-        UserService.manipulateDatabase(msg, RETRY_QUEUE_NAME)
+        MessageHandler.handleMessage(msg, RETRY_QUEUE_NAME)
     }).catch((err) => {
         console.error("Failed to consume the message:", err)
         process.exit(1)
     })
-    console.log('Started consuming from messageQueue');
+    console.log('Started consuming from messageQueue')
 
 }
 

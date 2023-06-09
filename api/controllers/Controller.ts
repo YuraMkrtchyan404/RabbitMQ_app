@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { MessagingCodes } from "../utils/messagingcodes.enum";
-import { MessageHandler } from "../utils/MessageHandler";
+import { Request, Response } from "express"
+import { MessagingCodes } from "../utils/messagingcodes.enum"
+import { MessageHandler } from "../utils/MessageHandler"
 
 export class Controller {
 

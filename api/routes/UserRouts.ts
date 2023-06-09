@@ -5,7 +5,7 @@ import { Controller } from '../controllers/Controller'
 export class UserRoutes {
     private router: Router
     private controller: Controller
-    private queueName: string;
+    private queueName: string
 
     constructor(queueName: string) {
         this.router = Router()

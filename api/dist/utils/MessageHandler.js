@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageHandler = void 0;
 const RabbitMQConnection_1 = require("./RabbitMQConnection");
 const console_1 = require("console");
-const messagingcodes_enum_1 = require("./messagingcodes.enum");
 const uuid_1 = require("uuid");
 class MessageHandler {
     static async sendMessageToQueue(messageType, requestData, req, res, queueName) {
@@ -30,16 +29,10 @@ class MessageHandler {
         const id = responseJson.id;
         const err = responseJson.error;
         const data = responseJson.data;
-        const messageDestination = responseJson.type;
         if (err) {
             const response = (_a = MessageHandler.requestIdMap.get(id)) === null || _a === void 0 ? void 0 : _a.res;
             if (response) {
-                if (messageDestination === messagingcodes_enum_1.MessagingCodes.ADD_RESPONSE) {
-                    response.status(500).json({ error: err });
-                }
-                else {
-                    response.status(404).json({ error: err });
-                }
+                response.status(404).json({ error: err });
             }
         }
         else {

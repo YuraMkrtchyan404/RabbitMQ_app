@@ -1,25 +1,21 @@
-import { PrismaClient } from '@prisma/client'
-import { RabbitMQConnection } from '../utils/RabbitMQConnection'
-import { MessagingCodes } from '../utils/messagingcodes.enum'
-
-const prisma = new PrismaClient()
+import { PrismaConnection } from '../utils/PrismaConnection'
 
 export class User {
-	private id?: number
-	private name: string
-	private surname: string
-	private password: string
-	private birthday: Date
+	private id?: number | undefined
+	private name: string | undefined
+	private surname: string | undefined
+	private password: string | undefined
+	private birthday: Date | undefined
 
 
-	public getName(): string {
+	public getName(): string | undefined {
 		return this.name
 	}
 	public setName(v: string) {
 		this.name = v
 	}
 
-	public getSurname(): string {
+	public getSurname(): string | undefined {
 		return this.surname
 	}
 	public setSurname(v: string) {
@@ -33,90 +29,78 @@ export class User {
 		this.id = v
 	}
 
-	constructor(name: string, surname: string, password: string, birthday: Date, id?: number) {
-		this.name = name
-		this.surname = surname
-		this.password = password
-		this.birthday = birthday
-		this.id = id
+	constructor(userInformation: any) {
+		const name: string = userInformation.data.name
+		const surname: string = userInformation.data.surname
+		const password: string = userInformation.data.password
+		const birthday: string = userInformation.data.birthday
+		const id: string = userInformation.data.id
+		if (name) {
+			this.name = name
+		}
+		if (surname) {
+			this.surname = surname
+		}
+		if (password) {
+			this.password = password
+		}
+		if (birthday) {
+			this.birthday = new Date(birthday)
+		}
+		if (id) {
+			this.id = parseInt(id)
+		}
 	}
 
-	public async getAndSendBackToRabbitMQ(messageId: string, queueName: string) {
+	public async getUser() {
 		try {
 			if (!this.id) {
 				throw new Error('Cannot get user without ID')
 			}
-			const user = await prisma.users.findUnique({
+			const user = await PrismaConnection.prisma.users.findUnique({
 				where: { id: this.id },
+				rejectOnNotFound: true,
 			})
-
-			if (user) {
-				await RabbitMQConnection.sendMessage({
-					id: messageId,
-					type: MessagingCodes.GET_RESPONSE,
-					data: { user },
-				}, queueName)
-			} else {
-				await RabbitMQConnection.sendMessage({ id: messageId, error: "User not found" }, queueName)
-			}
+			return user
+		} catch (error) {
+			console.error('Error while getting the user: ', error)
+			throw error
+		}
+	}
+	
+	public async getUsers() {
+		try {
+			const users = await PrismaConnection.prisma.users.findMany()
+			return users
 		} catch (error) {
 			console.error('Error while getting the user: ', error)
 			throw error
 		}
 	}
 
-	public async getManyAndSendBackToRabbitMQ(messageId: string, queueName: string){
+	public async saveUser() {
 		try {
-			const users = await prisma.users.findMany()
-
-			if (users) {
-				await RabbitMQConnection.sendMessage({
-					id: messageId,
-					type: MessagingCodes.GET_MANY_RESPONSE,
-					data: { users },
-				}, queueName)
-			} else {
-				await RabbitMQConnection.sendMessage({ id: messageId, error: "Users not found" }, queueName)
-			}
-		} catch (error) {
-			console.error('Error while getting the user: ', error)
-			throw error
-		}
-	}
-
-	public async saveAndSendBackToRabbitMQ(messageId: string, queueName: string) {
-		try {
-			const user = await prisma.users.create({
+			const user = await PrismaConnection.prisma.users.create({
 				data: {
-					name: this.name,
-					surname: this.surname,
-					password: this.password,
-					birthday: this.birthday,
+					name: this.name!,
+					surname: this.surname!,
+					password: this.password!,
+					birthday: this.birthday!,
 				},
 			})
-
-			if (user) {
-				await RabbitMQConnection.sendMessage({
-					id: messageId,
-					type: MessagingCodes.ADD_RESPONSE,
-					data: { user },
-				}, queueName)
-			} else {
-				await RabbitMQConnection.sendMessage({ id: messageId, error: "User not added" }, queueName)
-			}
+			return user
 		} catch (error) {
-			console.log('Error while adding new user: ', error);
+			console.log('Error while adding new user: ', error)
 			throw error
 		}
 	}
 
-	public async updateAndSendBackToRabbitMQ(messageId: string, queueName: string) {
+	public async updateUser() {
 		try {
 			if (!this.id) {
 				throw new Error('Cannot update user without ID')
 			}
-
-			const user = await prisma.users.update({
+			const user = await PrismaConnection.prisma.users.update({
 				where: { id: this.id },
 				data: {
 					name: this.name,
@@ -125,48 +109,25 @@ export class User {
 					birthday: this.birthday,
 				},
 			})
-
-			if (user) {
-				await RabbitMQConnection.sendMessage({
-					id: messageId,
-					type: MessagingCodes.UPDATE_RESPONSE,
-					data: { user },
-				}, queueName)
-			} else{
-				await RabbitMQConnection.sendMessage({ id: messageId, error: "User not updated" }, queueName)
-			}
+			return user
 		} catch (error) {
 			console.error('Error while updating the user: ', error)
 			throw error
 		}
 	}
 
-	public async deleteAndSendBackToRabbitMQ(messageId: string, queueName: string) {
+	public async deleteUser() {
 		try {
 			if (!this.id) {
 				throw new Error('Cannot delete user without ID')
 			}
-
-			const user = await prisma.users.delete({
+			const user = await PrismaConnection.prisma.users.delete({
 				where: { id: this.id },
 			})
-
-			if (user) {
-				await RabbitMQConnection.sendMessage({
-					id: messageId,
-					type: MessagingCodes.UPDATE_RESPONSE,
-					data: { user },
-				}, queueName)
-			} else{
-				await RabbitMQConnection.sendMessage({ id: messageId, error: "User not deleted" }, queueName)
-			}
+			return user
 		} catch (error) {
 			console.error('Error while deleting the user:', error)
 			throw error
 		}
-	}
-
-	public static generateEmptyUser(): User {
-		return new User("", "", "", new Date())
 	}
 }
