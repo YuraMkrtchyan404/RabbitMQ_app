@@ -20,7 +20,7 @@ export class MessageHandler {
             const messageDestination: UserMessagingCodes = information.type
             let responseObject: any
             if (messageDestination in UserMessagingCodes) {
-                responseObject = await MessageHandler.executeUserCRUD(information, messageDestination, responseObject)
+                responseObject = await MessageHandler.executeCRUD(information, messageDestination, responseObject)
             }
             return responseObject
         } catch (error) {
@@ -30,7 +30,7 @@ export class MessageHandler {
         }
     }
 
-    private static async executeUserCRUD(information: any, messageDestination: UserMessagingCodes, responseObject: any) {
+    private static async executeCRUD(information: any, messageDestination: UserMessagingCodes, responseObject: any) {
         const tempUser: User = new User(information)
 
         switch (messageDestination) {
