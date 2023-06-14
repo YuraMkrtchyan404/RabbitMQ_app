@@ -4,4 +4,5 @@ export enum MessagingCodes{
     DELETE_USER,
     GET_USER,
     GET_USERS,
+    LOGIN_USER
 }

@@ -3,9 +3,8 @@ import bodyParser from "body-parser"
 import cors from "cors"
 import { UserRoutes } from "./routes/UserRouts"
 import { RabbitMQConnection } from "./utils/RabbitMQConnection"
-import { error } from "console"
+import { error, log } from "console"
 import { MessageHandler } from "./utils/MessageHandler"
-import { PasswordHashingMiddleware } from "./middlewares/PasswordHash.middleware"
 
 const app = express()
 const URL = "amqp://username:password@localhost:5672"
@@ -15,7 +14,6 @@ const port = 3000
 
 app.use(bodyParser.json())
 app.use(cors())
-app.use(PasswordHashingMiddleware.hashPassword)
 
 const main = async () => {
 

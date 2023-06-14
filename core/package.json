@@ -11,10 +11,15 @@
   "devDependencies": {
     "@prisma/client": "^4.15.0",
     "@types/amqplib": "^0.10.1",
+    "@types/jsonwebtoken": "^9.0.2",
     "prisma": "^4.15.0"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
     "amqp": "^0.2.7",
-    "amqplib": "^0.10.3"
+    "amqplib": "^0.10.3",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.1.4",
+    "jsonwebtoken": "^9.0.0"
   }
 }

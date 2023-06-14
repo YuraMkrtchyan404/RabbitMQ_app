@@ -16,5 +16,6 @@ model users {
   surname  String   @db.VarChar(255)
   password String   @db.VarChar(255)
   birthday DateTime
+  email    String   @db.VarChar(255) @unique
 }
 

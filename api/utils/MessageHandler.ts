@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from "uuid"
 import * as amqp from "amqplib"
 
 export class MessageHandler {
-    public static requestIdMap: Map<string, { req: Request; res: Response }>
+    public static requestIdMap: Map<string, { req: Request; res: Response }> = new Map()
+    public static token: string
 
     public static async sendMessageToQueue(messageType: MessagingCodes, requestData: any, req: Request, res: Response, queueName: string): Promise<string> {
         try {
@@ -38,7 +39,9 @@ export class MessageHandler {
                 response.status(404).json({ error: err })
             }
         } else {
-            MessageHandler.requestIdMap.get(id)?.res.json(data)
+            MessageHandler.requestIdMap.get(id)?.res.json({
+                ...data,
+            })
         }
         RabbitMQConnection.channel!.ack(msg)
     }

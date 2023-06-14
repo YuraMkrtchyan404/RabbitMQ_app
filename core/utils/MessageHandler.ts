@@ -1,8 +1,8 @@
 import * as amqp from 'amqplib'
 import { log } from "console"
 import { RabbitMQConnection } from '../utils/RabbitMQConnection'
-import { User } from '../models/User'
-import { UserMessagingCodes } from '../utils/MessagingCodes.enum'
+import { MessagingCodes } from '../utils/MessagingCodes.enum'
+import { UserService } from '../services/UserService'
 
 export class MessageHandler {
 
@@ -12,60 +12,52 @@ export class MessageHandler {
         const messageId: string = information.id
         const responseObject: any = await MessageHandler.manipulateDatabase(information, queueName)
         RabbitMQConnection.channel!.ack(msg!)
+
         await MessageHandler.sendResponseToQueue(responseObject, queueName, messageId)
     }
 
     private static async manipulateDatabase(information: any, queueName: string) {
         try {
-            const messageDestination: UserMessagingCodes = information.type
-            let responseObject: any
-            if (messageDestination in UserMessagingCodes) {
-                responseObject = await MessageHandler.executeCRUD(information, messageDestination, responseObject)
-            }
-            return responseObject
-        } catch (error) {
+            const messageDestination: MessagingCodes = information.type
+            return await MessageHandler.executeCRUD(information, messageDestination)
+        } catch (error: any) {
             log("sending error as response")
-            await RabbitMQConnection.sendMessage({ id: information.id, error: error }, queueName)
-            log(error)
+            await RabbitMQConnection.sendMessage({ id: information.id, error: error.message }, queueName)
         }
     }
 
-    private static async executeCRUD(information: any, messageDestination: UserMessagingCodes, responseObject: any) {
-        const tempUser: User = new User(information)
+    private static async executeCRUD(information: any, messageDestination: MessagingCodes) {
 
         switch (messageDestination) {
-            case UserMessagingCodes.GET_USER:
-                responseObject = await tempUser.getUser()
-                break
+            case MessagingCodes.GET_USER:
+                return await UserService.getUser(information)
 
-            case UserMessagingCodes.ADD_USER:
-                responseObject = await tempUser.saveUser()
-                break
+            case MessagingCodes.ADD_USER:
+                return await UserService.registerUser(information)
 
-            case UserMessagingCodes.UPDATE_USER:
-                responseObject = await tempUser.updateUser()
-                break
+            case MessagingCodes.UPDATE_USER:
+                return await UserService.updateUser(information)
 
-            case UserMessagingCodes.DELETE_USER:
-                responseObject = await tempUser.deleteUser()
-                break
+            case MessagingCodes.DELETE_USER:
+                return await UserService.deleteUser(information)
 
-            case UserMessagingCodes.GET_USERS:
-                responseObject = await tempUser.getUsers()
-                break
+            case MessagingCodes.GET_USERS:
+                return await UserService.getUsers(information)
+
+            case MessagingCodes.LOGIN_USER:
+                return await UserService.loginUser(information)
 
             default:
                 log("Invalid message destination")
                 break
         }
-        return responseObject
     }
 
     private static async sendResponseToQueue(responseObject: any, queueName: string, messageId: string) {
         if (responseObject) {
             await RabbitMQConnection.sendMessage({
                 id: messageId,
-                data: { responseObject },
+                data: { ...responseObject },
             }, queueName)
         }
     }

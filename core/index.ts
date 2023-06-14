@@ -1,7 +1,5 @@
 import { RabbitMQConnection } from "./utils/RabbitMQConnection"
 import { error } from "console"
-import { UserService } from "./services/UserService"
-import { PrismaClient } from "@prisma/client"
 import { MessageHandler } from "./utils/MessageHandler"
 
 const URL = "amqp://username:password@localhost:5672"
