@@ -1,6 +1,7 @@
 import { RabbitMQConnection } from "./utils/RabbitMQConnection"
 import { error } from "console"
 import { MessageHandler } from "./utils/MessageHandler"
+require('dotenv').config({ path: '.env' });
 
 const URL = "amqp://username:password@localhost:5672"
 const QUEUE_NAME = "messageQueue"

@@ -1,7 +1,9 @@
-import { PrismaConnection } from '../utils/PrismaConnection'
+import { PrismaConnection } from '../../../utils/PrismaConnection'
 import bcrypt from 'bcrypt'
+import _ from 'lodash'
+import { UserInterface } from '../interface/UserInterface'
 
-export class User {
+export class User implements UserInterface{
 	private id?: number | undefined
 	private name: string | undefined
 	private surname: string | undefined
@@ -70,7 +72,8 @@ export class User {
 			const user = await PrismaConnection.prisma.users.findUniqueOrThrow({
 				where: { id: this.id },
 			})
-			return user
+			const userWithoutPassword = _.omit(user, 'password')
+			return userWithoutPassword
 		} catch (error) {
 			console.error('Error while getting the user: ', error)
 			throw error
@@ -80,7 +83,11 @@ export class User {
 	public async getUsers() {
 		try {
 			const users = await PrismaConnection.prisma.users.findMany()
-			return users
+
+			const usersWithoutPassword = users.map((user) => {
+				_.omit(user, 'password')
+			})
+			return usersWithoutPassword
 		} catch (error) {
 			console.error('Error while getting the user: ', error)
 			throw error
@@ -102,7 +109,9 @@ export class User {
 					email: this.email!
 				},
 			})
-			return user
+			const userWithoutPassword = _.omit(user, 'password')
+			return userWithoutPassword
+
 		} catch (error) {
 			console.log('Error while adding new user: ', error)
 			throw error
@@ -128,7 +137,9 @@ export class User {
 					email: this.email
 				},
 			})
-			return user
+			const userWithoutPassword = _.omit(user, 'password')
+			return userWithoutPassword
+
 		} catch (error) {
 			console.error('Error while updating the user: ', error)
 			throw error
@@ -143,7 +154,9 @@ export class User {
 			const user = await PrismaConnection.prisma.users.delete({
 				where: { id: this.id },
 			})
-			return user
+			const userWithoutPassword = _.omit(user, 'password')
+			return userWithoutPassword
+
 		} catch (error) {
 			console.error('Error while deleting the user:', error)
 			throw error
@@ -155,11 +168,11 @@ export class User {
 			const user = await PrismaConnection.prisma.users.findUnique({
 				where: { email: this.email },
 			});
-			return user;
+			return user
+
 		} catch (error) {
 			console.error('Error while finding the user by name:', error);
 			throw error;
 		}
 	}
-
 }
