@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+
+  db:
+    container_name: db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=yura
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - rabbitmq_go_net
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.9.13-management-alpine
+    restart: always
+    environment:
+      - "RABBITMQ_DEFAULT_PASS=password"
+      - "RABBITMQ_DEFAULT_USER=username"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - rabbitmq_go_net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "node_health_check"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      JWT_SECRET_KEY: "u4FjZq5b3Km8k9p2s6x8A0c1Wg5h7Jl9"
+      RABBITMQ_URL: "amqp://username:password@rabbitmq:5672"
+    depends_on:
+      db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rabbitmq_go_net
+    restart: always
+
+  core:
+    container_name: core
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://yura:password@db:5432/postgres?schema=public"
+      RABBITMQ_URL: "amqp://username:password@rabbitmq:5672"
+      JWT_SECRET_KEY: "u4FjZq5b3Km8k9p2s6x8A0c1Wg5h7Jl9"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - rabbitmq_go_net
+    restart: always
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
+
+volumes:
+  data:

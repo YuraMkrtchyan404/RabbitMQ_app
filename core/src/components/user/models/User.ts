@@ -84,7 +84,7 @@ export class User implements UserInterface{
 		try {
 			const users = await PrismaConnection.prisma.users.findMany()
 
-			const usersWithoutPassword = users.map((user) => {
+			const usersWithoutPassword = users.map((user: any) => {
 				_.omit(user, 'password')
 			})
 			return usersWithoutPassword

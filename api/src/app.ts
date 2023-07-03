@@ -8,7 +8,7 @@ import { MessageHandler } from "./utils/MessageHandler";
 import swaggerDocs from "./utils/swagger";
 
 const app = express();
-const URL = "amqp://username:password@localhost:5672";
+const URL = process.env.RABBITMQ_URL
 const RETRY_QUEUE_NAME = "retryQueue";
 const QUEUE_NAME = "messageQueue";
 const port = 3000;
@@ -21,7 +21,7 @@ const main = async () => {
   const userRoutes = new UserRoutes();
   app.use(userRoutes.getRouter());
 
-  await RabbitMQConnection.init(URL, QUEUE_NAME);
+  await RabbitMQConnection.init(URL!, QUEUE_NAME);
   await RabbitMQConnection.consumeMessage(RETRY_QUEUE_NAME, MessageHandler.receiveResponse).catch(
     (err) => {
       error("Failed to consume the message:", err);
@@ -36,6 +36,6 @@ app.listen(port, async () => {
 });
 
 main().catch((err) => {
-  error("Failed to initialize the app:", err);
+  error("Failed to initialize the app:", err, " THIS IS THE URL:   ", URL);
   process.exit(1);
 });

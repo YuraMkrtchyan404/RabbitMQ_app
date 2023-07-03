@@ -3,13 +3,13 @@ import { error } from "console"
 import { MessageHandler } from "./utils/MessageHandler"
 require('dotenv').config({ path: '.env' });
 
-const URL = "amqp://username:password@localhost:5672"
+const URL = process.env.RABBITMQ_URL
 const QUEUE_NAME = "messageQueue"
 const RETRY_QUEUE_NAME = "retryQueue"
 
 const main = async () => {
 
-    await RabbitMQConnection.init(URL, RETRY_QUEUE_NAME)
+    await RabbitMQConnection.init(URL!, RETRY_QUEUE_NAME)
     await RabbitMQConnection.consumeMessage(QUEUE_NAME, (msg) => {
         MessageHandler.handleMessage(msg, RETRY_QUEUE_NAME)
     }).catch((err) => {
